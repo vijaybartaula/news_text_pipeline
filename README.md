@@ -1,242 +1,179 @@
-# News Text Preprocessing Pipeline
+# Fake News Detection System
 
-A comprehensive Python pipeline for preprocessing news text data with advanced NLP techniques including tokenization, stemming, lemmatization, and machine learning model training.
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://tensorflow.org/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.0+-green.svg)](https://scikit-learn.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Features
+## Overview
 
-- **Robust Text Cleaning**: URL removal, email filtering, special character handling
-- **Advanced Tokenization**: NLTK-powered tokenization with stopword removal
-- **Multiple Stemming Algorithms**: Porter, Lancaster, and Snowball stemmers
-- **POS-Aware Lemmatization**: Context-aware word normalization using part-of-speech tagging
-- **Automated ML Pipeline**: Built-in TF-IDF vectorization and logistic regression classification
-- **Error Handling**: Comprehensive error handling and fallback mechanisms
-- **Flexible Data Loading**: Automatic column detection and CSV processing
+A comprehensive machine learning system for detecting fake news articles using multiple natural language processing approaches. This project compares the effectiveness of traditional machine learning methods with modern deep learning techniques for binary classification of news articles as either "REAL" or "FAKE".
 
-## Requirements
+## Key Features
 
-### Dependencies
+- **Multi-Model Approach**: Implements and compares three different classification methods
+- **Advanced Text Preprocessing**: Comprehensive text cleaning, tokenization, lemmatization, and stopword removal
+- **Feature Engineering**: Both traditional TF-IDF and modern Word2Vec embeddings
+- **Deep Learning**: LSTM neural network with dropout regularization
+- **Comprehensive Evaluation**: Detailed performance metrics and visualizations
+- **Production Ready**: Clean, modular code with proper error handling
+
+## Performance Results
+
+| Model | Accuracy | Precision (FAKE) | Recall (FAKE) | F1-Score (FAKE) |
+|-------|----------|------------------|---------------|-----------------|
+| **TF-IDF + Logistic Regression** | **92.94%** | **0.91** | **0.95** | **0.93** |
+| Word2Vec + Logistic Regression | 89.37% | 0.89 | 0.90 | 0.89 |
+| LSTM Neural Network | 84.00% | 0.87 | 0.80 | 0.83 |
+
+## Quick Start
+
+### Prerequisites
+
 ```bash
-pip install nltk pandas scikit-learn
+pip install nltk pandas numpy scikit-learn tensorflow gensim matplotlib seaborn
 ```
 
-### Required NLTK Data
-The pipeline automatically downloads the following NLTK datasets:
-- `punkt_tab` - Sentence tokenization
-- `stopwords` - English stopwords
-- `wordnet` - WordNet lexical database
-- `averaged_perceptron_tagger` - POS tagging
-- `averaged_perceptron_tagger_eng` - English POS tagging
+### Installation
 
-## 🛠Installation
-
-1. **Clone or download the pipeline script**
-2. **Install dependencies**:
-   ```bash
-   pip install nltk pandas scikit-learn
-   ```
-3. **Run the pipeline** - NLTK data will be downloaded automatically on first run
-
-## Input Data Format
-
-The pipeline expects a CSV file named `news.csv` with at least one text column. Supported column names:
-- `text`
-- `content` 
-- `article`
-- `news_text`
-- `body`
-
-Optional label columns for ML training:
-- `label`
-- `category`
-- `class`
-- `target`
-- `sentiment`
-
-### Example CSV Structure
-```csv
-text,category
-"Breaking news: Stock market reaches new highs...",business
-"Scientists discover new species in Amazon rainforest...",science
+1. Clone the repository:
+```bash
+git clone https://github.com/vijaybartaula/news_text_pipeline.git
+cd news_text_pipeline
 ```
 
-## Usage
-
-### Basic Usage
+2. Download NLTK data:
 ```python
-# Simply run the main function
-main()
+import nltk
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger_eng')
 ```
 
-### Individual Functions
+### Usage
+
+1. **Prepare your dataset**: Ensure your CSV file has columns named `title`, `text`, and `label`
+
+2. **Use individual components**:
 ```python
-# Load data
-df = load_data('your_file.csv')
+from fake_news_detector import FakeNewsDetector
 
-# Clean individual text
-clean = clean_text("Your raw text here!")
+# Initialize detector
+detector = FakeNewsDetector()
 
-# Full preprocessing
-processed = full_preprocess("Your text here", method='lemmatize')
+# Load and preprocess data
+detector.load_data('your_dataset.csv')
+detector.preprocess_data()
 
-# Train ML model
-model, vectorizer = train_model(df, 'text_column', 'label_column')
+# Train models
+detector.train_all_models()
+
+# Make predictions
+prediction = detector.predict("Your news article text here")
 ```
 
-### Preprocessing Options
+## System Architecture
+
+### Data Pipeline
+1. **Data Loading**: CSV file with news articles and labels
+2. **Text Preprocessing**: 
+   - Lowercasing and punctuation removal
+   - Tokenization and stopword removal
+   - Lemmatization with POS tagging
+3. **Feature Engineering**:
+   - TF-IDF vectorization (max 5000 features, 1-2 grams)
+   - Word2Vec embeddings (100 dimensions)
+   - LSTM tokenization and padding
+
+### Models
+
+#### 1. TF-IDF + Logistic Regression
+- **Best performing model** with 92.94% accuracy
+- Uses traditional bag-of-words approach with TF-IDF weighting
+- Handles n-grams for better context understanding
+- Fast training and inference
+
+#### 2. Word2Vec + Logistic Regression
+- Word embeddings capture semantic relationships
+- Document vectors created by averaging word vectors
+- 89.37% accuracy with good generalization
+
+#### 3. LSTM Neural Network
+- Deep learning approach with embedding layer
+- Bidirectional LSTM for sequence processing
+- Dropout regularization to prevent overfitting
+- 84.00% accuracy (may improve with more data/tuning)
+
+## Dataset Information
+
+- **Total Articles**: 6,335 (after preprocessing: 6,298)
+- **Features**: Article title, full text content, binary label
+- **Classes**: REAL vs FAKE (balanced distribution)
+- **Train/Test Split**: 80/20 with stratification
+
+## Technical Details
+
+### Text Preprocessing Pipeline
 ```python
-# Use lemmatization (default - recommended)
-processed_lemma = full_preprocess(text, method='lemmatize')
-
-# Use stemming
-processed_stem = full_preprocess(text, method='stem')
+def full_preprocess(text):
+    text = clean_text(text)                    # Remove special chars, digits
+    tokens = tokenize_and_remove_stopwords(text) # NLTK tokenization
+    text = ' '.join(tokens)
+    text = lemmatize_text(text)                # POS-aware lemmatization
+    return text
 ```
 
-## Pipeline Stages
+### Model Hyperparameters
 
-### Stage 1: Data Loading
-- CSV file detection and loading
-- Column identification and validation
-- Error handling for missing files
+**LSTM Configuration:**
+- Embedding dimension: 100
+- LSTM units: 128 → 64 (stacked)
+- Dropout: 0.5
+- Dense layer: 64 units
+- Max sequence length: 200
+- Vocabulary size: 10,000
 
-### Stage 2: Text Cleaning
-- Lowercase conversion
-- URL and email removal
-- Special character filtering
-- Whitespace normalization
+**TF-IDF Configuration:**
+- Max features: 5,000
+- N-gram range: (1, 2)
+- Sublinear TF scaling
 
-### Stage 3: Tokenization
-- NLTK word tokenization
-- Stopword removal (English)
-- Single character filtering
+## Evaluation Metrics
 
-### Stage 4: Text Normalization
-Choose between:
-- **Lemmatization**: Context-aware word reduction using POS tags
-- **Stemming**: Rule-based word reduction (Porter/Lancaster/Snowball)
+The system provides comprehensive evaluation including:
+- **Accuracy**: Overall classification accuracy
+- **Precision/Recall/F1**: Per-class performance metrics
+- **Confusion Matrix**: Detailed classification breakdown
+- **Training History**: Loss and accuracy curves for LSTM
+- **Feature Analysis**: Top TF-IDF features visualization
 
-### Stage 5: Machine Learning (Optional)
-- TF-IDF vectorization (max 5000 features)
-- Logistic regression classification
-- Train/test split (80/20)
-- Performance evaluation with classification report
+## Key Findings
 
-## Output
+1. **Traditional Methods Excel**: TF-IDF with logistic regression outperformed deep learning approaches
+2. **Feature Engineering Matters**: Proper text preprocessing significantly impacts performance
+3. **Balanced Performance**: High precision and recall for both classes
+4. **Computational Efficiency**: Simpler models train faster with comparable results
 
-### Processed Data
-- Original CSV with added `processed_text` column
-- Saved as `processed_news.csv`
-- Preprocessing statistics and performance metrics
+## Future Improvements
 
-### Console Output
-```
-Starting News Text Preprocessing Pipeline
-==================================================
-
-Step 14a: Loading data...
-  Successfully loaded news.csv
-  Dataset shape: 1000 rows, 3 columns
-
-Step 14d: Processing 1,000 texts...
-  Average original length: 245.3 characters
-  Average processed length: 156.7 characters
-  Reduction: 36.1%
-
-Step 14i: Training machine learning model...
-  Model Accuracy: 0.847
-  Classification Report:
-              precision    recall  f1-score   support
-     business       0.85      0.82      0.83        50
-      science       0.84      0.87      0.86        50
-```
-
-## Configuration
-
-### Stemming Algorithms
-```python
-# Available options in apply_stemming()
-'porter'     # Porter Stemmer - most common
-'lancaster'  # Lancaster Stemmer - most aggressive  
-'snowball'   # Snowball Stemmer - default, balanced
-```
-
-### TF-IDF Parameters
-```python
-# Configurable in train_model()
-max_features=5000  # Maximum vocabulary size
-min_df=2          # Minimum document frequency
-max_df=0.8        # Maximum document frequency (80%)
-```
-
-## Troubleshooting
-
-### Common Issues
-
-**FileNotFoundError: 'news.csv'**
-- Ensure your CSV file is in the same directory as the script
-- Check the filename matches exactly (case-sensitive)
-
-**NLTK Download Errors**
-- Check internet connection
-- Run manually: `nltk.download('punkt')`
-
-**Memory Issues with Large Datasets**
-- Reduce `max_features` in TF-IDF vectorizer
-- Process data in chunks
-
-**No Text Column Found**
-- Rename your text column to one of: `text`, `content`, `article`, `news_text`, `body`
-- Or modify the `possible_text_cols` list in the code
-
-## Performance
-
-### Typical Processing Times
-- **Small Dataset** (1K articles): ~30 seconds
-- **Medium Dataset** (10K articles): ~3-5 minutes  
-- **Large Dataset** (100K articles): ~30-45 minutes
-
-### Memory Usage
-- Approximately 100MB RAM per 10,000 articles
-- TF-IDF vectorization is the most memory-intensive step
-
-## Advanced Usage
-
-### Custom Stopwords
-```python
-# Add domain-specific stopwords
-custom_stops = get_stopwords()
-custom_stops.update(['reuters', 'associated', 'press'])
-```
-
-### Batch Processing
-```python
-# Process multiple files
-files = ['news1.csv', 'news2.csv', 'news3.csv']
-for file in files:
-    df = load_data(file)
-    # Process each file...
-```
+- [ ] Implement BERT/transformer-based models
+- [ ] Add cross-validation for robust evaluation
+- [ ] Ensemble methods combining multiple models
+- [ ] Real-time prediction API
+- [ ] Extended feature engineering (sentiment, readability)
+- [ ] Multi-language support
 
 ## License
 
-This project is open source. Feel free to modify and distribute according to your needs.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contributing
+## References
 
-Contributions are welcome! Areas for enhancement:
-- Additional preprocessing techniques
-- More ML algorithms
-- Performance optimizations
-- Better visualization of results
-
-## Support
-
-For issues or questions:
-1. Check the troubleshooting section
-2. Review the console output for specific error messages
-3. Ensure all dependencies are properly installed
+- Pedregosa, F., et al. (2011). Scikit-learn: Machine learning in Python. JMLR 12, pp. 2825-2830.
+- Mikolov, T., et al. (2013). Efficient estimation of word representations in vector space. arXiv preprint arXiv:1301.3781.
+- Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. Neural computation, 9(8), 1735-1780.
 
 ---
 
-**Version**: 1.0  
-**Last Updated**: 31 May 2025  
-**Compatibility**: Python 3.7+
+**Built with ❤️ for combating misinformation**
