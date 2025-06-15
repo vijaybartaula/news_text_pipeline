@@ -164,15 +164,15 @@ The system provides comprehensive evaluation including:
 - [ ] Extended feature engineering (sentiment, readability)
 - [ ] Multi-language support
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## References
 
 - Pedregosa, F., et al. (2011). Scikit-learn: Machine learning in Python. JMLR 12, pp. 2825-2830.
 - Mikolov, T., et al. (2013). Efficient estimation of word representations in vector space. arXiv preprint arXiv:1301.3781.
 - Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. Neural computation, 9(8), 1735-1780.
+
+---
+
+**Note**: This system is designed for research and educational purposes. Always verify results with domain experts before deploying in production environments.
 
 ---
 
